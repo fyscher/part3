@@ -36,6 +36,19 @@ app.get('/info', (req, res) =>
   res.send(`<p>This phonebook has info for ${persons.length} people.</p><br/><p>${new Date().toUTCString()}</p>`)
 })
 
+app.get('/api/persons/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const p = persons.find(p => p.id === id)
+  if (p)
+  {
+    res.json(p)
+  } else
+  {
+    res.status(404).send(`<h1>Error 404: Not Found</h1>`);
+  }
+})
+
+
 
 const PORT = 3001
 app.listen( PORT, () => {
