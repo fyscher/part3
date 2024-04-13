@@ -31,33 +31,17 @@ app.get('/api/persons', (req, res) =>
   res.json(persons)
 })
 
+app.get('/info', (req, res) =>
+{
+  res.send(`<p>This phonebook has info for ${persons.length} people.</p><br/><p>${new Date().toUTCString()}</p>`)
+})
+
+
 const PORT = 3001
 app.listen( PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-// const express = require('express');
-// const app = express();
-
-// app.use(express.json())
-
-// let notes = [
-//   {
-//     id: 1,
-//     content: "HTML is easy",
-//     important: true
-//   },
-//   {
-  //     id: 2,
-//     content: "Browser can execute only JavaScript",
-//     important: false
-//   },
-//   {
-//     id: 3,
-//     content: "GET and POST are the most important methods of HTTP protocol",
-//     important: true
-//   }
-// ]
 
 // app.get('/', (req, res) => {
 //   res.send(`<h1>Hello World!</h1>`)
