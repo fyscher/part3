@@ -55,14 +55,26 @@ app.delete('/api/persons/:id', (req, res) =>
   res.status(204).end();
 })
 
-app.post('/api/persons', (req, res) =>
-{
-  id = Math.floor(Math.random() * 1000000)
-  const person = req.body;
-  person["id"] = id;
-  console.log('person ', person)
-  res.json(person)
-})
+  app.post('/api/persons', (req, res) =>
+  {
+    const person = req.body;
+    const id = Math.floor(Math.random() * 1000000)
+    person["id"] = id;
+
+    if (person["name"] && person["number"])
+    {
+      if (persons.map(p => p.id).find(i => i === person.id))
+      {
+        res.status(409).send(`error 409: person already exists in database`)
+      } else
+      {
+        res.json(person)
+      }
+    } else
+    {
+      res.status(400).send(`error 400: please include required information`)
+    }
+  })
 
 const PORT = 3001
 app.listen( PORT, () => {
