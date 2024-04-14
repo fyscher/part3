@@ -1,10 +1,12 @@
 const express = require('express');
 const morgan = require('morgan');
 
+morgan.token('body', req => JSON.stringify(req.body))
+
 const app = express();
 
 app.use(express.json());
-app.use(morgan('tiny'))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 let persons = [
   { 
@@ -63,7 +65,8 @@ app.post('/api/persons', (req, res) =>
   const person = req.body;
   const id = Math.floor(Math.random() * 1000000)
   person["id"] = id;
-
+  console.log(req)
+  
   if (person["name"] && person["number"])
   {
     if (persons.map(p => p.id).find(i => i === person.id))
