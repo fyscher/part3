@@ -16,7 +16,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
-    "localtunnel": "^1.9.2"
+    "localtunnel": "^2.0.2",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

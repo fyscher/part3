@@ -1,7 +1,10 @@
 const express = require('express');
+const morgan = require('morgan');
+
 const app = express();
 
 app.use(express.json());
+app.use(morgan('tiny'))
 
 let persons = [
   { 
@@ -55,26 +58,32 @@ app.delete('/api/persons/:id', (req, res) =>
   res.status(204).end();
 })
 
-  app.post('/api/persons', (req, res) =>
-  {
-    const person = req.body;
-    const id = Math.floor(Math.random() * 1000000)
-    person["id"] = id;
+app.post('/api/persons', (req, res) =>
+{
+  const person = req.body;
+  const id = Math.floor(Math.random() * 1000000)
+  person["id"] = id;
 
-    if (person["name"] && person["number"])
+  if (person["name"] && person["number"])
+  {
+    if (persons.map(p => p.id).find(i => i === person.id))
     {
-      if (persons.map(p => p.id).find(i => i === person.id))
-      {
-        res.status(409).send(`error 409: person already exists in database`)
-      } else
-      {
-        res.json(person)
-      }
+      res.status(409).send(`error 409: person already exists in database`)
     } else
     {
-      res.status(400).send(`error 400: please include required information`)
+      res.json(person)
     }
-  })
+  } else
+  {
+    res.status(400).send(`error 400: please include required information`)
+  }
+})
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
 
 const PORT = 3001
 app.listen( PORT, () => {
