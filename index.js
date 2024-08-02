@@ -49,17 +49,10 @@ app.get('/info', (req, res) =>
   res.send(`<p>This phonebook has info for ${persons.length} people.</p><br/><p>${new Date().toUTCString()}</p>`)
 })
 
-app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const p = persons.find(p => p.id === id)
-  if (p)
+app.get('/api/persons/:id', (req, res) => 
   {
-    res.json(p)
-  } else
-  {
-    res.status(404).send(`<h1>Error 404: Not Found</h1>`);
-  }
-})
+    Entry.findById(req.params.id).then(entry => res.json(entry))
+  })
 
 app.delete('/api/persons/:id', (req, res) =>
 {
@@ -70,24 +63,20 @@ app.delete('/api/persons/:id', (req, res) =>
 
 app.post('/api/persons', (req, res) =>
 {
-  const person = req.body;
-  const id = Math.floor(Math.random() * 1000000)
-  person["id"] = id;
-  console.log(req)
-  
-  if (person["name"] && person["number"])
+  const body = req.body;
+
+  if (body.name === undefined)
   {
-    if (persons.map(p => p.id).find(i => i === person.id))
-    {
-      res.status(409).send(`error 409: person already exists in database`)
-    } else
-    {
-      res.json(person)
-    }
-  } else
-  {
-    res.status(400).send(`error 400: please include required information`)
+    return res.status(400).json({ error: 'name missing'})
   }
+
+  const entry = new Entry
+  ({
+    name: body.name,
+    number: body.number,
+  })
+
+  entry.save().then( saved => { res.json(saved) })
 })
 
 const unknownEndpoint = (req, res) => {
