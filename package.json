@@ -19,6 +19,8 @@
   "author": "Fyscher Kraal",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "localtunnel": "^2.0.2",
     "mongoose": "^8.5.2",
