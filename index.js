@@ -41,7 +41,14 @@ app.get('/api/persons', (req, res) =>
 
 app.get('/info', (req, res) =>
 {
-  res.send(`<p>This phonebook has info for ${persons.length} people.</p><br/><p>${new Date().toUTCString()}</p>`)
+  Entry
+  .find({})
+  .then( entry => res.send(`Total Phonebook entries: ${entry.length}`))
+  .catch( error => 
+    {
+      console.log(error)
+      next(error)
+    })
 })
 
 app.get('/api/persons/:id', (req, res) => 
