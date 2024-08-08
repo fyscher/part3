@@ -16,14 +16,19 @@ const unknownEndpoint = (req, res) =>
 
 const errorHandler = (error, req, res, next) =>
 {
-  console.error(error.message)
+  console.log('error.name: ', error.name)
 
-  if (error.name === 'CastError')
+  switch (error.name)
   {
-    return res.status(400).send({ error: 'malformatted id' })
-  } 
-
-  next(error)
+    case 'CastError':
+      res.status(400).send({ error: 'Malformatted Id' })
+      break;
+    case 'ValidationError':
+      res.status(400).json({ error: error.message })
+      break;
+    default:
+      next(error)
+  }
 }
 
 app.use(express.json());
@@ -62,7 +67,6 @@ app.get('/api/persons/:id', (req, res) =>
       .catch( error =>
       {
         console.log(error)
-        res.status(500).send({ error: 'malformatted id'})
         next(error)
       }
       )
@@ -72,32 +76,22 @@ app.delete('/api/persons/:id', (req, res) =>
 {
   Entry
     .findByIdAndDelete(req.params.id)
-    .then( result => 
-      res.status(204).end())
+    .then( result => res.status(204).end())
     .catch( error => next(error) )
 })
 
-app.put('/api/persons/:id', (req, res) =>
+app.put('/api/persons/:id', (req, res, next) =>
 {
-  const body = req.body
-
-  const entry = 
-  {
-    name: body.name,
-    number: body.number,
-  }
+  const {name, number} = req.body
 
   Entry
-    .findByIdAndUpdate(req.params.id, entry, { new: true })
-    .then( updatedEntry =>
-    {
-      res.json(updatedEntry)
-    }
-    )
-    .catch( error => next(error) )
-})
+    .findByIdAndUpdate(req.params.id, {name, number}, { new: true, runValidators: true, context: 'query' })
+    .then( updatedEntry => res.json(updatedEntry))
+    .catch( error => next(error))
+  }
+)
 
-app.post('/api/persons', (req, res) =>
+app.post('/api/persons', (req, res, next) =>
 {
   const body = req.body;
 
@@ -111,7 +105,7 @@ app.post('/api/persons', (req, res) =>
   ? res.status(400).json({ error: 'must fill out both fields' })
   : entry
     .save()
-    .then( saved =>{ res.json(saved) })
+    .then( saved => { res.json(saved) })
     .catch( error => { next(error) })
 })
 
@@ -119,6 +113,4 @@ app.use(unknownEndpoint)
 
 app.use(errorHandler)
 
-app.listen( PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+app.listen( PORT, () => console.log(`Server running on port ${PORT}`))
