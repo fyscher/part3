@@ -1,13 +1,13 @@
 require('dotenv').config()
-const express = require('express');
-const morgan  = require('morgan');
-const cors    = require('cors');
-const Entry   = require('./models/entry') 
+const express = require('express')
+const morgan  = require('morgan')
+const cors    = require('cors')
+const Entry   = require('./models/entry')
 const PORT    = process.env.PORT
 
 morgan.token('body', req => JSON.stringify(req.body))
 
-const app = express();
+const app = express()
 
 const unknownEndpoint = (req, res) =>
 {
@@ -20,23 +20,23 @@ const errorHandler = (error, req, res, next) =>
 
   switch (error.name)
   {
-    case 'CastError':
-      res.status(400).send({ error: 'Malformatted Id' })
-      break;
-    case 'ValidationError':
-      res.status(400).json({ error: error.message })
-      break;
-    default:
-      next(error)
+  case 'CastError':
+    res.status(400).send({ error: 'Malformatted Id' })
+    break
+  case 'ValidationError':
+    res.status(400).json({ error: error.message })
+    break
+  default:
+    next(error)
   }
 }
 
-app.use(express.json());
+app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.use(cors())
-app.use(express.static('dist'));
+app.use(express.static('dist'))
 
-app.get('/api/persons', (req, res) =>
+app.get('/api/persons', (req, res, next) =>
 {
   Entry
     .find({})
@@ -44,56 +44,56 @@ app.get('/api/persons', (req, res) =>
     .catch(error => next(error))
 })
 
-app.get('/info', (req, res) =>
+app.get('/info', (req, res, next) =>
 {
   Entry
-  .find({})
-  .then( entry => res.send(`Total Phonebook entries: ${entry.length}`))
-  .catch( error => 
+    .find({})
+    .then( entry => res.send(`Total Phonebook entries: ${entry.length}`))
+    .catch( error =>
     {
       console.log(error)
       next(error)
     })
 })
 
-app.get('/api/persons/:id', (req, res) => 
-  {
-    Entry
-      .findById(req.params.id)
-      .then( entry => 
-        ! entry
+app.get('/api/persons/:id', (req, res, next) =>
+{
+  Entry
+    .findById(req.params.id)
+    .then( entry =>
+      ! entry
         ? res.status(404).json({ error: 'no entry found' })
         : res.json(entry))
-      .catch( error =>
-      {
-        console.log(error)
-        next(error)
-      }
-      )
-  })
+    .catch( error =>
+    {
+      console.log(error)
+      next(error)
+    }
+    )
+})
 
-app.delete('/api/persons/:id', (req, res) =>
+app.delete('/api/persons/:id', (req, res, next) =>
 {
   Entry
     .findByIdAndDelete(req.params.id)
-    .then( result => res.status(204).end())
+    .then( () => res.status(204).end())
     .catch( error => next(error) )
 })
 
 app.put('/api/persons/:id', (req, res, next) =>
 {
-  const {name, number} = req.body
+  const { name, number } = req.body
 
   Entry
-    .findByIdAndUpdate(req.params.id, {name, number}, { new: true, runValidators: true, context: 'query' })
+    .findByIdAndUpdate(req.params.id, { name, number }, { new: true, runValidators: true, context: 'query' })
     .then( updatedEntry => res.json(updatedEntry))
     .catch( error => next(error))
-  }
+}
 )
 
 app.post('/api/persons', (req, res, next) =>
 {
-  const body = req.body;
+  const body = req.body
 
   const entry = new Entry
   ({
@@ -102,11 +102,11 @@ app.post('/api/persons', (req, res, next) =>
   })
 
   ! body.name || ! body.number
-  ? res.status(400).json({ error: 'must fill out both fields' })
-  : entry
-    .save()
-    .then( saved => { res.json(saved) })
-    .catch( error => { next(error) })
+    ? res.status(400).json({ error: 'must fill out both fields' })
+    : entry
+      .save()
+      .then( saved => { res.json(saved) })
+      .catch( error => { next(error) })
 })
 
 app.use(unknownEndpoint)
